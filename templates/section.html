@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ section }} News - Daily Random News</title>
+    <link rel="stylesheet" href="{{ my_url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1>Daily Random News</h1>
+            <p class="tagline">Where the news is always fresh and unpredictable</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-container">
+            <ul>
+                <li><a href="{{ my_url_for('index') }}"><i class="fas fa-home"></i> Home</a></li>
+                {% for section_name in sections %}
+                <li><a href="{{ my_url_for('section', section_name=section_name) }}" {% if section_name == section %}class="active"{% endif %}>{{ section_name }}</a></li>
+                {% endfor %}
+                <li><a href="{{ my_url_for('refresh') }}" class="refresh-link"><i class="fas fa-sync-alt"></i> Refresh All</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <div class="container">
+            <section class="news-section">
+                <h2>{{ section }} News</h2>
+                <div class="news-list">
+                    {% for article in news_content %}
+                    <div class="news-card">
+                        <div class="news-content">
+                            <h3>{{ article.headline }}</h3>
+                            <p>{{ article.content }}</p>
+                            <div class="news-meta">
+                                <span class="author">By {{ article.author }}</span>
+                                <span class="date">{{ article.date }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2023 Random News Generator | Created for demonstration purposes</p>
+            <p>All news articles are randomly generated and not real</p>
+        </div>
+    </footer>
+</body>
+</html>
