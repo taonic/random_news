@@ -86,14 +86,6 @@ nav ul li a.active {
     color: white;
 }
 
-.refresh-link {
-    color: #3498db !important;
-}
-
-.refresh-link:hover {
-    color: #2980b9 !important;
-}
-
 /* Welcome section styles */
 .welcome-section {
     margin: 40px 0;

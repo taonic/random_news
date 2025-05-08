@@ -21,7 +21,6 @@
                 {% for section in sections %}
                 <li><a href="{{ my_url_for('section', section_name=section) }}">{{ section }}</a></li>
                 {% endfor %}
-                <li><a href="{{ my_url_for('refresh') }}" class="refresh-link"><i class="fas fa-sync-alt"></i> Refresh All</a></li>
             </ul>
         </div>
     </nav>
