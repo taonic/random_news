@@ -45,14 +45,9 @@ This project uses:
 
 4. Set up Amazon Bedrock:
    - Go to the Amazon Bedrock console
-   - Request access to the model: amazon.nova-pro-v1
-   - Find the inference profile ARN by using: `aws bedrock list-inference-profiles --region ap-southeast-2`
-
-5. Update the `bedrock_client.py` file with your inference profile ID:
-   ```python
-   # In bedrock_client.py
-   INFERENCE_PROFILE_ID = "your_inference_profile_id"
-   ```
+   - Request access to the model you want to use (e.g., Claude, Titan)
+   - Create an inference profile for the model
+   - Note the inference profile ARN or ID
 
 ## Project Setup
 
@@ -61,85 +56,58 @@ This project uses:
    pip install -r requirements.txt
    ```
 
-2. Start the Temporal worker and workflows:
+2. Start the Temporal server (using Docker):
    ```
-   python start.py --bucket your-bucket-name --region us-east-1
+   docker-compose up -d
+   ```
+
+3. Start the Temporal worker and workflows:
+   ```
+   python start.py --bucket your-bucket-name --inference-profile your-inference-profile-id
    ```
 
 ## Worker Options
 
-- `--bucket`: S3 bucket name for deployment (optional)
+- `--bucket`: S3 bucket name for deployment (default: news-generator-bucket)
 - `--region`: AWS region (default: ap-southeast-2)
 - `--count`: Number of news items per section (default: 5)
+- `--model-id`: Bedrock model ID (default: anthropic.claude-v2)
+- `--inference-profile`: Bedrock inference profile ID or ARN (required)
 
 Examples:
 
-Start worker with workflows and S3 deployment:
+Start worker with specific model and inference profile:
 ```
-python start.py --bucket your-bucket-name --region us-west-2 --count 5
-```
-
-### Deployment Options
-
-- `--bucket`: S3 bucket name (required)
-- `--region`: AWS region (default: us-east-1)
-- `--count`: Number of news items per section (default: 5)
-- `--skip-generation`: Skip news generation and only deploy existing content
-- `--wait`: Wait for deployment to complete and show the final URL
-
-Example with all options:
-```
-python deploy.py --bucket your-bucket-name --region us-west-2 --count 10 --wait
-```
-
-To only deploy existing content without regenerating news:
-```
-python deploy.py --bucket your-bucket-name --skip-generation
+python start.py --bucket your-bucket-name --model-id anthropic.claude-v2 --inference-profile your-inference-profile-id
 ```
 
 ## Environment Variables
 
-- `S3_BUCKET`: S3 bucket name for deployment (optional)
-- `S3_REGION`: AWS region for S3 bucket (default: us-east-1)
 - `AWS_ACCESS_KEY_ID`: Your AWS access key ID
 - `AWS_SECRET_ACCESS_KEY`: Your AWS secret access key
 - `AWS_DEFAULT_REGION`: Your AWS default region
+- `BEDROCK_MODEL_ID`: Bedrock model ID to use
+- `BEDROCK_INFERENCE_PROFILE_ID`: Bedrock inference profile ID or ARN
 
 ## Project Structure
 
-- `temporal_activities.py`: Temporal activities for news generation and S3 deployment
 - `temporal_workflows.py`: Temporal workflow for news generation and S3 deployment
-- `temporal_client.py`: Client for interacting with Temporal workflows
+- `activities.py`: Temporal activities for news generation and S3 deployment
 - `start.py`: Script to start worker and workflows
 - `static_generator.py`: Utility for generating static HTML files
 - `s3_client.py`: Utility for interacting with AWS S3 using aioboto3
-- `deploy.py`: Command-line tool for deployment
 - `bedrock_client.py`: Client for Amazon Bedrock
-- `templates/`: HTML templates
-- `static/`: Static assets (CSS, JS)
+- `templates/`: HTML templates (created automatically if not present)
 - `output/`: Generated static files (created during deployment)
 
 ## Workflow Architecture
 
 The project uses a single Temporal workflow:
 
-**NewsGenerationWorkflow**: Handles both news generation and S3 deployment
+**GenNewsWorkflow**: Handles both news generation and S3 deployment
 - Generates news content for a specific section
-- Can be configured to deploy to S3 at creation time
-- Can receive signals to trigger S3 deployment at any time
-- Periodically regenerates content and redeploys to S3 if configured
-
-This integrated approach simplifies the architecture while maintaining flexibility.
-
-## Performance Benefits of aioboto3
-
-This project uses aioboto3 for asynchronous AWS operations, which provides several benefits:
-
-1. **Concurrent uploads**: Multiple files can be uploaded to S3 simultaneously
-2. **Non-blocking I/O**: AWS operations don't block the event loop
-3. **Better integration**: Works seamlessly with other async code in the project
-4. **Reduced overhead**: Fewer resources needed for handling multiple connections
-5. **Faster deployments**: Parallel processing of S3 operations
+- Deploys the content to S3
+- Periodically regenerates content and redeploys to S3
 
 ## Troubleshooting
 
@@ -147,7 +115,7 @@ This project uses aioboto3 for asynchronous AWS operations, which provides sever
 
 If you encounter the error "Retry your request with the ID or ARN of an inference profile that contains this model", make sure:
 1. You have created an inference profile in the Amazon Bedrock console
-2. You have updated the `bedrock_client.py` file with your inference profile ID
+2. You are providing the inference profile ID using the `--inference-profile` parameter or `BEDROCK_INFERENCE_PROFILE_ID` environment variable
 3. You have proper permissions to access the model
 
 ### S3 Access Issues

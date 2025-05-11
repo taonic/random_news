@@ -12,7 +12,8 @@ class WorkflowInput:
     section: str
     count: int = 5
     s3_bucket: str = ""
-    s3_region: str = "us-east-1"
+    region: str = "us-east-1"
+    model_id: str = ""
 
 # Import activities
 with workflow.unsafe.imports_passed_through():
@@ -24,13 +25,12 @@ class GenNewsWorkflow:
     """Workflow that generates news for a specific section periodically and can deploy to S3"""
     
     def __init__(self):
-        self._news_items = []
         self._section = ""
         self._count = 5
         self._running = True
         self._s3_bucket = ""
-        self._s3_region = "us-east-1"
-        self._website_url = ""
+        self._region = "us-east-1"
+        self._model_id = ""
     
     @workflow.run
     async def run(self, input: WorkflowInput):
@@ -46,7 +46,8 @@ class GenNewsWorkflow:
         self._section = input.section
         self._count = input.count
         self._s3_bucket = input.s3_bucket
-        self._s3_region = input.s3_region
+        self._region = input.region
+        self._model_id = input.model_id
         
         # Set up timer for periodic regeneration
         try:
@@ -58,7 +59,12 @@ class GenNewsWorkflow:
                 
                 news_items = await workflow.execute_activity(
                     generate,
-                    GenerateInput(self._section, self._count),
+                    GenerateInput(
+                        section=self._section,
+                        count=self._count,
+                        model_id=self._model_id,
+                        region=self._region
+                    ),
                     retry_policy=retry_policy,
                     start_to_close_timeout=timedelta(seconds=60)
                 )
@@ -66,15 +72,15 @@ class GenNewsWorkflow:
                 await workflow.execute_activity(
                     deploy,
                     DeployInput(
-                        bucket_name=self._s3_bucket,
-                        region=self._s3_region,
                         section=self._section,
-                        news_data=news_items
+                        news_data=news_items,
+                        bucket_name=self._s3_bucket,
+                        region=self._region
                     ),
                     retry_policy=retry_policy,
                     start_to_close_timeout=timedelta(seconds=120)
                 )
-                    
+
                 await workflow.sleep(30)
         except CancelledError:
             # Handle workflow cancellation

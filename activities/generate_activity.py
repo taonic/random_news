@@ -9,15 +9,6 @@ from dataclasses import dataclass
 from temporalio import activity
 from activities.bedrock_client import bedrock_client
 
-# News sections
-NEWS_SECTIONS = [
-    "Technology",
-    "Sports",
-    "Entertainment",
-    "Business",
-    "Health"
-]
-
 # Generate author names
 def random_author():
     first_names = ["John", "Sarah", "Michael", "Emma", "David", "Olivia", "James", "Sophia", "Robert", "Emily"]
@@ -28,6 +19,8 @@ def random_author():
 class GenerateInput:
     section: str
     count: int
+    model_id: str
+    region: str
 
 @activity.defn
 async def generate(input: GenerateInput) -> List[Dict[str, Any]]:
@@ -63,14 +56,14 @@ async def generate(input: GenerateInput) -> List[Dict[str, Any]]:
     [
         {{
             "headline": "Headline of the article 1",
-            "content": "Detailed content of the article 1",
+            "content": "Detailed content of the article 1", 
             "author": "Author Name 1",
             "date": "Date and time of generation"
         }},
         {{
             "headline": "Headline of the article 2",
             "content": "Detailed content of the article 2",
-            "author": "Author Name 2",
+            "author": "Author Name 2", 
             "date": "Date and time of generation"
         }}
     ]
@@ -78,7 +71,12 @@ async def generate(input: GenerateInput) -> List[Dict[str, Any]]:
     Current date and time: {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
     """
     
-    generated_content = await bedrock_client.generate_content(prompt, max_tokens=4000)
+    generated_content = await bedrock_client.generate_content(
+        prompt,
+        max_tokens=4000,
+        model_id=input.model_id,
+        region_name=input.region
+    )
     
     try:
         # Parse the generated content
