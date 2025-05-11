@@ -70,6 +70,7 @@ class StaticSiteGenerator:
         Returns:
             str: Path to the generated file
         """
+        logger.info(f"Generating section page for {len(news_content)} contents")   
         template = self.env.get_template('section.html')
         
         # Render the template

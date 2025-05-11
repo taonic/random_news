@@ -32,6 +32,7 @@ class GenNewsWorkflow:
         self._region = "us-east-1"
         self._model_id = ""
         self._iterations = 0
+        self._news_items = []
     
     @workflow.run
     async def run(self, input: WorkflowInput):
@@ -58,7 +59,7 @@ class GenNewsWorkflow:
                     maximum_interval=timedelta(seconds=10),
                 )
                 
-                news_items = await workflow.execute_activity(
+                new_item = await workflow.execute_activity(
                     generate,
                     GenerateInput(
                         section=self._section,
@@ -70,11 +71,13 @@ class GenNewsWorkflow:
                     start_to_close_timeout=timedelta(seconds=60)
                 )
                 
+                self._news_items = self._news_items + [new_item]
+                
                 await workflow.execute_activity(
                     deploy,
                     DeployInput(
                         section=self._section,
-                        news_data=news_items,
+                        news_data=self._news_items,
                         bucket_name=self._s3_bucket,
                         region=self._region
                     ),

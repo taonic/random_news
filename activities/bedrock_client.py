@@ -32,7 +32,7 @@ class BedrockClient:
                         "content": [ { "text": prompt} ]
                     }
                 ],
-                "inferenceConfig": { "maxTokens": max_tokens, "temperature": 1, "topP": 1 }
+                "inferenceConfig": { "maxTokens": max_tokens, "temperature": 1, "topP": 1, "topK": 50 }
             }
             
             # Create a new client for each request to avoid reusing coroutines
