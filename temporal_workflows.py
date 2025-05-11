@@ -31,6 +31,7 @@ class GenNewsWorkflow:
         self._s3_bucket = ""
         self._region = "us-east-1"
         self._model_id = ""
+        self._iterations = 0
     
     @workflow.run
     async def run(self, input: WorkflowInput):
@@ -80,7 +81,11 @@ class GenNewsWorkflow:
                     retry_policy=retry_policy,
                     start_to_close_timeout=timedelta(seconds=120)
                 )
-
+                
+                self._iterations += 1
+                if self._iterations >= 10:
+                    await workflow.continue_as_new(input)
+                
                 await workflow.sleep(30)
         except CancelledError:
             # Handle workflow cancellation
