@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Random News</title>
-    <link rel="stylesheet" href="{{ my_url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
         <div class="nav-container">
             <ul>
                 {% for section in sections %}
-                <li><a href="{{ my_url_for('section', section_name=section) }}">{{ section }}</a></li>
+                <li><a href="/{{ section|lower }}/">{{ section }}</a></li>
                 {% endfor %}
             </ul>
         </div>
@@ -34,7 +34,7 @@
                 <div class="section-grid">
                     {% for section in sections %}
                     <div class="section-card">
-                        <a href="{{ my_url_for('section', section_name=section) }}">
+                        <a href="/{{ section|lower }}/">
                             <h3>{{ section }} News</h3>
                             <p>Read the latest 5 articles about {{ section.lower() }}</p>
                             <span class="read-more">Read More <i class="fas fa-arrow-right"></i></span>
