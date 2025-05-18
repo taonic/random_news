@@ -56,9 +56,9 @@ This project uses:
    pip install -r requirements.txt
    ```
 
-2. Start the Temporal server (using Docker):
+2. Start a Temporal server locally
    ```
-   docker-compose up -d
+   temporal server start-dev
    ```
 
 3. Start the Temporal worker and workflows:

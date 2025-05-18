@@ -19,7 +19,7 @@ async def start_workflows(client, s3_bucket="", region="us-east-1", model_id="",
     """Start news generation workflow for each news section"""
     for section in NEWS_SECTIONS:
         workflow_id = f"news_generation_{section.lower()}"
-        
+
         try:
             # Check if workflow already exists
             try:
@@ -40,7 +40,7 @@ async def start_workflows(client, s3_bucket="", region="us-east-1", model_id="",
                     region=region,
                     model_id=model_id
                 )
-                
+
                 await client.start_workflow(
                     GenNewsWorkflow.run,
                     workflow_input,
@@ -57,21 +57,21 @@ async def main():
     parser.add_argument('--bucket', default='agentic-hackathon-wlg', help='S3 bucket name for deployment')
     parser.add_argument('--region', default='ap-southeast-2', help='AWS region (default: ap-southeast-2)')
     parser.add_argument('--model-id', default=DEFAULT_MODEL_ID, help='Bedrock model ID (e.g., anthropic.claude-v2)')
-    parser.add_argument('--count', type=int, default=5, help='Number of news items per section (default: 5)')
+    parser.add_argument('--count', type=int, default=1, help='Number of news items per section (default: 5)')
     args = parser.parse_args()
-    
+
     # Create client connected to server at the given address
     client = await Client.connect("localhost:7233")
-    
+
     logger.info("Starting workflows")
     await start_workflows(
-        client, 
-        args.bucket, 
-        args.region, 
+        client,
+        args.bucket,
+        args.region,
         args.model_id,
         args.count
     )
-    
+
     # Run the worker
     logger.info("Starting worker")
     interrupt_event = asyncio.Event()

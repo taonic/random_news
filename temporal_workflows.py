@@ -23,7 +23,7 @@ with workflow.unsafe.imports_passed_through():
 @workflow.defn
 class GenNewsWorkflow:
     """Workflow that generates news for a specific section periodically and can deploy to S3"""
-    
+
     def __init__(self):
         self._section = ""
         self._count = 5
@@ -33,15 +33,15 @@ class GenNewsWorkflow:
         self._model_id = ""
         self._iterations = 0
         self._news_items = []
-    
+
     @workflow.run
     async def run(self, input: WorkflowInput):
         """
         Run the news generation workflow.
-        
+
         Args:
             input: WorkflowInput with section, count, and S3 configuration
-            
+
         Returns:
             Dict with news items and website URL if deployed
         """
@@ -50,7 +50,7 @@ class GenNewsWorkflow:
         self._s3_bucket = input.s3_bucket
         self._region = input.region
         self._model_id = input.model_id
-        
+
         # Set up timer for periodic regeneration
         try:
             while self._running:
@@ -58,7 +58,7 @@ class GenNewsWorkflow:
                     initial_interval=timedelta(seconds=1),
                     maximum_interval=timedelta(seconds=10),
                 )
-                
+
                 new_item = await workflow.execute_activity(
                     generate,
                     GenerateInput(
@@ -70,9 +70,9 @@ class GenNewsWorkflow:
                     retry_policy=retry_policy,
                     start_to_close_timeout=timedelta(seconds=60)
                 )
-                
-                self._news_items = self._news_items + [new_item]
-                
+
+                self._news_items = [new_item]
+
                 await workflow.execute_activity(
                     deploy,
                     DeployInput(
@@ -84,11 +84,11 @@ class GenNewsWorkflow:
                     retry_policy=retry_policy,
                     start_to_close_timeout=timedelta(seconds=120)
                 )
-                
+
                 self._iterations += 1
                 if self._iterations >= 10:
                     await workflow.continue_as_new(input)
-                
+
                 await workflow.sleep(30)
         except CancelledError:
             # Handle workflow cancellation
